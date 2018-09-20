@@ -68,10 +68,10 @@ int insereFim(Lista *li, char *dado, int index){
 	}else{
 		int i = 0;
 		char *auxChar = calloc(2, sizeof(char));
+		No *no = NULL;
 		while(i < strlen(dado)){
 			*auxChar = dado[i];
-			No *no = criaNo(auxChar, index++);
-
+			no = criaNo(auxChar, index);
 			if(*li == NULL){
 				*li = no;
 			}else{
@@ -80,16 +80,40 @@ int insereFim(Lista *li, char *dado, int index){
 				*li = no;
 			}
 			++i;
+			++index;
 		}
 	}
 
 	return OK;
 }
 
-void positInit(Lista *li){
+void positInit(Lista *li, int numPos){
 
-	while((*li)->ant != NULL){
+	int i = 0;
+	if(numPos == 0){
+		while((*li)->ant != NULL){
+			(*li) = (*li)->ant;
+		}
+		return;
+	}
+	while(((*li)->ant != NULL) && (i < numPos)){
 		(*li) = (*li)->ant;
+		++i;
+	}
+}
+
+void positFim(Lista *li, int numPos){
+
+	int i = 0;
+	if(numPos == 0){
+		while((*li)->prox != NULL){
+			(*li) = (*li)->prox;
+		}
+		return;
+	}
+	while(((*li)->prox != NULL) && (i < numPos)){
+		(*li) = (*li)->prox;
+		++i;
 	}
 }
 
@@ -131,11 +155,30 @@ void apagaCharArray(char *array){
 	}
 }
 
+int ehEsp(char *auxPalavra){
+	if((auxPalavra[0] >= 'A' && auxPalavra[0] <= 'Z') || (auxPalavra[0] >= 'a' && auxPalavra[0] <= 'z') || (auxPalavra[0] >= '0' && auxPalavra[0] <= '9')){
+		return 0;
+	}
+	return 1;
+}
+
 void imprimeLista(Lista *li){
 
 	No *aux = *li;
 	while(aux != NULL){
-		printf("[%d] [%s] ",aux->index, aux->dado);
+		if(aux->prox != NULL){
+			if(ehEsp(aux->prox->dado)){
+				printf("%s", aux->dado);
+			}else{
+				if(aux->dado[0] == '\n'){
+					printf("%s", aux->dado);	
+				}else{
+					printf("%s ", aux->dado);
+				}
+			}
+		}else{
+			printf("%s", aux->dado);
+		}
 		aux = aux->prox;
 	}
 	printf("\n");
@@ -152,42 +195,23 @@ int insereAntes(Lista *li, char *dado, int index){
 	if(li == NULL){
 		return ERRO;
 	}
-	if((dado[0] >= 'A' && dado[0] <= 'Z') || (dado[0] >= 'a' && dado[0] <= 'z') || (dado[0] >= '0' && dado[0] <= '9')){
-		No *no = criaNo(dado, index);
-		if(*li == NULL){
-			*li = no;
-		}else{
-			no->ant = (*li)->ant;
-			(*li)->ant = no;
-			no->prox = *li;
-			if(no->ant != NULL){
-				no->ant->prox = no;
-			}
-		}
-	}else{
-		int i = 0;
-		char *auxChar = calloc(2, sizeof(char));
-		while(i < strlen(dado)){
-			*auxChar = dado[i];
-			No *no = criaNo(auxChar, index++);
-
-			if(*li == NULL){
-				*li = no;
-			}else{
-				no->ant = (*li)->ant;
-				(*li)->ant = no;
-				no->prox = *li;
-				if(no->ant != NULL){
-					no->ant->prox = no;
-				}
-			}
-			++i;
-		}
+	No *no = criaNo(dado, index);
+	if(*li == NULL){
+		*li = no;
+		return OK;
 	}
-	No *no = *li;
-	while(no != NULL){
-		++no->index;
-		no = no->prox;
+	No *aux1 = (*li)->ant;
+	(*li)->ant = no;
+	no->prox = *li;
+	no->ant = aux1;
+	if(aux1 != NULL){
+		aux1->prox = no;
+	}
+	
+	No *aux = *li;
+	while(aux != NULL){
+		++(aux->index);
+		aux = aux->prox;
 	}
 	return OK;
 }
@@ -197,43 +221,23 @@ int insereDepois(Lista *li, char *dado, int index){
 	if(li == NULL){
 		return ERRO;
 	}
-	if((dado[0] >= 'A' && dado[0] <= 'Z') || (dado[0] >= 'a' && dado[0] <= 'z') || (dado[0] >= '0' && dado[0] <= '9')){
-		No *no = criaNo(dado, index);
-		if(*li == NULL){
-			*li = no;
-		}else{
-			no->prox = (*li)->prox;
-			(*li)->prox = no;
-			no->ant = (*li);
-			if(no->prox != NULL){
-				(no->prox)->ant = no;
-			}
-		}
-	}else{
-		int i = 0;
-		char *auxChar = calloc(2, sizeof(char));
-		while(i < strlen(dado)){
-			*auxChar = dado[i];
-			No *no = criaNo(auxChar, index++);
-
-			if(*li == NULL){
-				*li = no;
-			}else{
-				no->prox = (*li)->prox;
-				(*li)->prox = no;
-				no->ant = (*li);
-				if(no->prox != NULL){
-					(no->prox)->ant = no;
-				}
-			}
-			++i;
-		}
+	No *no = criaNo(dado, index);
+	if(*li == NULL){
+		*li = no;
+		return OK;
 	}
-	No *no = *li;
-	no = no->prox;
-	while(no != NULL){
-		++no->index;
-		no = no->prox;
+	no->prox = (*li)->prox;
+	(*li)->prox = no;
+	no->ant = (*li);
+	if(no->prox != NULL){
+		(no->prox)->ant = no;
+	}
+	
+	No *aux = *li;
+	aux = aux->prox;
+	while(aux != NULL){
+		++aux->index;
+		aux = aux->prox;
 	}
 
 	return OK;
@@ -244,19 +248,12 @@ int removeAtual(Lista *cursor){
 	if(cursor == NULL){
 		return ERRO;
 	}
-
-	No *aux1 = *cursor;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
-	*cursor = aux1->prox;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
-	aux1->prox->ant = aux1->ant;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
+	*cursor = (*cursor)->prox;
+	No *aux1 = (*cursor)->ant;
 	aux1->ant->prox = aux1->prox;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
+	aux1->prox->ant = aux1->ant;
 	aux1->prox = NULL;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
 	aux1->ant = NULL;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
 	free(aux1);
 	No *aux2 = *cursor;
 	while(aux2 != NULL){
@@ -271,14 +268,9 @@ int removePrim(Lista *cursor){
 	if(cursor == NULL){
 		return ERRO;
 	}
-	No *aux1 = *cursor;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
+	*cursor = (*cursor)->prox;
+	No *aux1 = (*cursor)->ant;
 	aux1->prox->ant = NULL;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
-	*cursor = aux1->prox;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
-	aux1->prox = NULL;
-	printf("cu %s a1 %s\n", (*cursor)->dado, aux1->dado);
 	free(aux1);
 	No *aux2 = *cursor;
 	while(aux2 != NULL){
@@ -293,22 +285,24 @@ int removeUlt(Lista *cursor){
 	if(cursor == NULL){
 		return ERRO;
 	}
-	No *aux = (*cursor);
-	*cursor = aux->ant;
-	aux->ant->prox = NULL;
-	free(aux);
+	*cursor = (*cursor)->ant;
+	No *aux1 = (*cursor)->prox;
+	aux1->ant->prox = NULL;
+	free(aux1);
 	return OK;
 }
 
 Lista *lerArq(char *nome){
 
-	strcat(nome, ".ext");
-	FILE *arqEnt = fopen(nome, "rt");
 	Lista *liHead = criaLista();
 	Lista *liAux = liHead;
-	if(arqEnt == NULL){
-		printf("Erro!\n");
-		return liHead;
+	strcat(nome, ".ext");
+	FILE *arqEnt = fopen(nome, "rt");
+	while(arqEnt == NULL){
+		printf("Arquivo nao encontrado. Digite novamente: \n");
+		nome = nameArq();
+		strcat(nome, ".ext");
+		arqEnt = fopen(nome, "rt");
 	}
 	int i = 0;
 	int j = 0;
@@ -338,13 +332,14 @@ Lista *lerArq(char *nome){
 					++j;
 				}
 				insereFim(liAux, caracteres, j);
-				apagaCharArray(caracteres);
 				j = j + strlen(caracteres);
+				apagaCharArray(caracteres);
 			}
 			auxPalavra = strtok(NULL, " ");
 		}
 	}
-	positInit(liHead);
+	fclose(arqEnt);
+	positInit(liHead, 0);
 	return liHead;
 }
 
@@ -361,33 +356,72 @@ int buscaPalavra(Lista *cursor, char *dado){
 	return ERRO;
 }
 
+void removeNL(char *input){ 
+    int len = strlen(input);
+    if(input[0] == '\n'){
+    	return;
+    }
+    if (len > 0 && input[len-1] == '\n') {
+        input[--len] = '\0';
+    }
+}
+
+int getNumber(char *palavra){
+
+	char *endBuff;
+	removeNL(palavra);
+	int number = strtol(palavra, &endBuff, 10);
+    while (*endBuff != '\0'){
+        printf("Por favor digite um numero valido: ");
+        fgets(palavra, 127, stdin);
+        removeNL(palavra);
+        number = strtol(palavra, &endBuff, 10);
+    }
+    return number;
+}
+
+void destroi(Lista *li){
+
+	while((*li) != NULL){
+		*li = (*li)->prox;
+		if(*li != NULL){
+			free((*li)->ant);
+		}
+	}
+}
+
 void comandos(Lista *li){
 
 	Lista *cursor = li;
-	char comando = '0';
-	char auxPalavra[30];
+	char comando;
+	char auxLinha[30];
+	char *auxPalavra;
+	int numPos = 0;
 
 	while(comando != 's'){
-		scanf(" %c", &comando);
+		fgets(auxLinha, sizeof(auxLinha), stdin);
+		auxPalavra = strtok(auxLinha, " ");
+		comando = auxPalavra[0];
 		switch(comando) {
 			case 'i':
-				scanf(" %s", auxPalavra);
-				if((auxPalavra[0] >= 'A' && auxPalavra[0] <= 'Z') || (auxPalavra[0] >= 'a' && auxPalavra[0] <= 'z') || (auxPalavra[0] >= '0' && auxPalavra[0] <= '9')){
-					insereAntes(cursor, auxPalavra, (*cursor)->index);
-				}else{
-					insereAntes(cursor, auxPalavra, (*cursor)->index);
+				auxPalavra = strtok(NULL, " ");
+				removeNL(auxPalavra);
+				if(ehEsp(auxPalavra) && (strlen(auxPalavra) > 1)){
+					break;
 				}
+				insereAntes(cursor, auxPalavra, (*cursor)->index);
 				break;
 			case 'a':
-				scanf(" %s", auxPalavra);
-				if((auxPalavra[0] >= 'A' && auxPalavra[0] <= 'Z') || (auxPalavra[0] >= 'a' && auxPalavra[0] <= 'z') || (auxPalavra[0] >= '0' && auxPalavra[0] <= '9')){
-					insereDepois(cursor, auxPalavra, (*cursor)->index);
-				}else{
-					insereDepois(cursor, auxPalavra, (*cursor)->index);
+				auxPalavra = strtok(NULL, " ");
+				removeNL(auxPalavra);
+				if(ehEsp(auxPalavra) && (strlen(auxPalavra) > 1)){
+					break;
 				}
+				insereDepois(cursor, auxPalavra, (*cursor)->index);
 				break;
 			case 'r':
-				scanf(" %s", auxPalavra);
+				auxPalavra = strtok(NULL, " ");
+				removeNL(auxPalavra);
 				if((*cursor)->prox == NULL){
 					removeUlt(cursor);
 					insereDepois(cursor, auxPalavra, (*cursor)->index);
@@ -395,14 +429,17 @@ void comandos(Lista *li){
 					if((*cursor)->ant == NULL){
 						removePrim(cursor);
 						insereAntes(cursor, auxPalavra, (*cursor)->index);
+						*cursor = (*cursor)->ant;
 					}else{
 						removeAtual(cursor);
-						insereDepois(cursor, auxPalavra, (*cursor)->index);
+						insereAntes(cursor, auxPalavra, (*cursor)->index);
+						*cursor = (*cursor)->ant;
 					}
 				}
 				break;
 			case 'f':
-				scanf(" %s", auxPalavra);
+				auxPalavra = strtok(NULL, " ");
+				removeNL(auxPalavra);
 				buscaPalavra(cursor, auxPalavra);
 				break;
 			case 'd':
@@ -415,29 +452,37 @@ void comandos(Lista *li){
 						removeAtual(cursor);
 					}
 				}
-				printf("d atu %s\n", (*cursor)->dado);
-				printf("d ant %s\n", (*cursor)->ant->dado);
-				printf("d pro %s\n", (*cursor)->prox->dado);
 				break;
 			case 'n':
-				cursor = &((*cursor)->prox);
-				printf("n atu %s\n", (*cursor)->dado);
-				printf("n ant %s\n", (*cursor)->ant->dado);
-				printf("n pro %s\n", (*cursor)->prox->dado);
+				if((*cursor)->prox != NULL){
+					positFim(cursor,1);
+				}
 				break;
 			case 'p':
+				if((*cursor)->ant != NULL){
+					positInit(cursor,1);
+				}
 				break;
 			case 'b':
+				positInit(cursor, 0);
 				break;
 			case 'e':
+				positFim(cursor, 0);
 				break;
 			case 'g':
+				auxPalavra = strtok(NULL, " ");
+				numPos = getNumber(auxPalavra);
+				if(numPos < 0){
+					numPos = (-1)*numPos;
+					positInit(cursor, numPos);
+				}else{
+					positFim(cursor, numPos);
+				}
 				break;
 			case 's':
-				while((*cursor)->ant != NULL){
-					cursor = &((*cursor)->ant);
-				}
-				imprimeLista(li);
+				positInit(cursor, 0);
+				imprimeLista(cursor);
+				destroi(cursor);
 				break;
 		}
 	}
