@@ -185,13 +185,13 @@ void imprimeLista(Lista *li){
 				printf("%s", aux->dado);	//Imprime sem caracteres adicionais
 			}else{	//Senao
 				if(aux->dado[0] == '\n'){	//Se for uma quebra de linha, imprime sem caracteres adicionais
-					printf("%s", aux->dado);	
+					printf("%s", aux->dado);	//Imprime sem caracteres adicionais
 				}else{	//Senao imprime com um espaco
-					printf("%s ", aux->dado);
+					printf("%s ", aux->dado);	//Imprime sem caracteres adicionais
 				}
 			}
 		}else{	//Se o proximo ja for NULL, imprime sem caracteres adicionais
-			printf("%s", aux->dado);
+			printf("%s", aux->dado);	//Imprime sem caracteres adicionais
 		}
 		aux = aux->prox;
 	}
@@ -346,7 +346,7 @@ Lista *lerArq(char *nome){
 	char caracteres[30];
 	char *auxChar;
 	char *auxPalavra;
-
+	
 	while(fgets(auxLinha, 299, arqEnt)){	//Enquanto houver linhas no arquivo
 		auxPalavra = strtok(auxLinha, " ");	//Pega a primeira palavra
 		while(auxPalavra != NULL){	//Enquanto houver palavras na linha
@@ -359,17 +359,37 @@ Lista *lerArq(char *nome){
 			}
 			caracteres[i] = '\0';	//Finaliza o vetor de caracteres especiais
 			if(strcmp(caracteres, "") == 0){	//Se o vetor estiver vazio (somente caracteres comuns)
-				insereFim(liAux, auxPalavra, j);	//Insere somente a palavra normalmente
+				insereFim(liAux, auxPalavra, j);	//Insere somente a palavra normalmente	
 				++j;
 			}else{	//Se nao estiver vazio
-				if(auxPalavra[0] != caracteres[0]){	//Se a palavra nao for o proprio caractere
+				char *ultimoEsp;
+				if(auxPalavra[0] == caracteres[0]){	//Se a palavra for o proprio caractere
+					insereFim(liAux, caracteres, j);	//Insere os caracteres
+					j = j + strlen(caracteres);
+				}else{	//Se nao for, eh a palavra eh composta de comum + especial (e pode ser + comum tambem)
+					auxChar = procuraCarac(auxPalavra);	//Procura a posicao do caractere especial
+					ultimoEsp = auxChar;	//Guarda a posicao
 					apagaChar(auxPalavra, caracteres[0]);	//Apaga os caracteres da palavra
 					insereFim(liAux, auxPalavra, j);	//Insere a palavra
 					++j;
+					if(auxChar != NULL){	//Se a palavra tiver caractere
+						while(auxChar != NULL){	//Enquanto tiver caractere
+							++auxChar;
+							auxChar = procuraCarac(auxChar);	//Procura os outros
+							if(auxChar != NULL){	//Se tiver, guarda
+								ultimoEsp = auxChar;
+							}
+						}
+						insereFim(liAux, caracteres, j);	//Insere os caracteres
+						j = j + strlen(caracteres) - 1;
+						if(ultimoEsp != NULL){	//Se tiver comum, insere
+							++ultimoEsp;
+							insereFim(liAux, ultimoEsp, j);
+							++j;
+						}
+					}
+					apagaCharArray(caracteres);	//Apaga o vetor de caracteres
 				}
-				insereFim(liAux, caracteres, j);	//Insere os caracteres
-				j = j + strlen(caracteres);
-				apagaCharArray(caracteres);	//Apaga o vetor de caracteres
 			}
 			auxPalavra = strtok(NULL, " ");	//Pega a proxima palavra da linha
 		}
